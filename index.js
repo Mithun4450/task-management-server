@@ -1,17 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const cors = require('cors');
 require('dotenv').config()
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json())
-
-// taskManagement
-// Pe8Hs5lis8S3tALU
-
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mcynqnr.mongodb.net/?retryWrites=true&w=majority`;
@@ -27,10 +23,39 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    const taskCollection = client.db("taskManagement").collection("tasks");
+
+    // tasks related
+    app.post('/tasks', async(req, res) =>{
+    const task = req.body;
+    console.log(task);
+    const result = await taskCollection.insertOne(task);
+    res.send(result);
+    })
+
+    app.get('/tasks/:email', async(req, res) =>{
+        const email = req.params.email;
+        const query = { user_email: email };
+        const result = await taskCollection.find(query).toArray();
+        res.send(result)
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
